@@ -14,14 +14,14 @@
 int main()
 {
     //string for file user wants to analyze
-    std::string userFilename;
+    std::string userFilename = "test.txt";
 
     //get user filename
-    std::cout << "Enter file name: ";
-    std::getline(std::cin, userFilename);
+    //std::cout << "Enter file name: ";
+    //std::getline(std::cin, userFilename);
 
     //msg
-    std::cout << "Analyzing " << userFilename;
+    std::cout << "Analyzing " << userFilename << std::endl << std::endl;
 
     //open input file stream
     std::ifstream sourceFile;
@@ -30,24 +30,43 @@ int main()
     //string for current line being worked on
     std::string workingLine;
 
-    //get first line
-    std::getline(sourceFile, workingLine);
+    while (std::getline(sourceFile, workingLine)) {
+        //
+        std::vector<std::string> potentialLexemes;
+        std::string currentLexeme = "";
 
-    //list of lexemes
-    std::vector<Lexeme> lexemesList;
+        //scan for potential lexemes
+        for (int i = 0; i < workingLine.size(); i++) {
+            
+            if (isSymbol(workingLine[i], 'O')) {
 
-    //index pointer for current line being worked on
-    int workingLinePointer = 0;
+                potentialLexemes.push_back(currentLexeme);
+                currentLexeme = "";
 
-    //parse current line loop
-    for (int i = 0; i == workingLine.size(); i++) {
+                currentLexeme = currentLexeme + workingLine[i];
+                potentialLexemes.push_back(currentLexeme);
+                currentLexeme = "";
 
-        //check for beginning of identifier or reserved word
-        if (isAlphabetical(workingLine[workingLinePointer])) {
-            //TODO HERE
+            } else if (workingLine[i] != ' ') {
+
+                currentLexeme = currentLexeme + workingLine[i];
+
+            }
+            else {
+                if (currentLexeme != "") {
+
+                    potentialLexemes.push_back(currentLexeme);
+
+                }
+                //std::cout << "lexeme push: " << currentLexeme << std::endl; - DEBUG
+                currentLexeme = "";
+            }
+        }
+
+        for (int i = 0; i < potentialLexemes.size(); i++) {
+            std::cout << "lexeme: " << potentialLexemes[i] << std::endl;
         }
     }
-
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

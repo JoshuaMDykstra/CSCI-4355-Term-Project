@@ -1,14 +1,27 @@
 #pragma once
 
-#include "CSCI 4355 Term Project.cpp"
+#include <string>
 
 //bool function to check if char is in aphabet ignoring case
-bool isAlphabetical(char target) {
+bool isSymbol(char target, char type) {
 	
-	const std::string alphabet = { "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" };
+	std::string list = "";
 
-	for (int i = 0; i < 52; i++) {
-		if (target == alphabet[i]) {
+	switch (type) {
+
+	case 'A':
+		list = { "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" };
+		break;
+	case 'N':
+		list = { "0123456789" };
+		break;
+	case 'O':
+		list = { ":=<>+-*/():;," };
+		break;
+	}
+
+	for (int i = 0; i < list.size(); i++) {
+		if (target == list[i]) {
 			return true;
 		}
 	}
