@@ -31,35 +31,49 @@ int main()
     std::string workingLine;
 
     while (std::getline(sourceFile, workingLine)) {
+        workingLine = workingLine + '\n';
+
         //
         std::vector<std::string> potentialLexemes;
         std::string currentLexeme = "";
 
         //scan for potential lexemes
         for (int i = 0; i < workingLine.size(); i++) {
+
+            //std::cout << workingLine[i] << std::endl;
             
+            //check for symbols
             if (isSymbol(workingLine[i], 'O')) {
 
-                potentialLexemes.push_back(currentLexeme);
-                currentLexeme = "";
-
-                currentLexeme = currentLexeme + workingLine[i];
-                potentialLexemes.push_back(currentLexeme);
-                currentLexeme = "";
-
-            } else if (workingLine[i] != ' ') {
-
-                currentLexeme = currentLexeme + workingLine[i];
-
-            }
-            else {
                 if (currentLexeme != "") {
-
                     potentialLexemes.push_back(currentLexeme);
-
+                    currentLexeme = "";
                 }
-                //std::cout << "lexeme push: " << currentLexeme << std::endl; - DEBUG
+
+                currentLexeme = currentLexeme + workingLine[i];
+
+                //check for multi symbol lexemes
+                if (workingLine[i] == ':' && workingLine[i + 1] == '=') {
+                    currentLexeme = currentLexeme + workingLine[i + 1];
+                    i++;
+                } else if (workingLine[i] == '<' && workingLine[i + 1] == '>') {
+                    currentLexeme = currentLexeme + workingLine[i + 1];
+                    i++;
+                }
+
+                potentialLexemes.push_back(currentLexeme);
                 currentLexeme = "";
+
+            } 
+            else if (workingLine[i] != ' ') {
+
+                currentLexeme = currentLexeme + workingLine[i];
+
+                if (workingLine[i + 1] == ' ' || workingLine[i + 1] == '\n') {
+                    potentialLexemes.push_back(currentLexeme);
+                    currentLexeme = "";
+                }
+
             }
         }
 
