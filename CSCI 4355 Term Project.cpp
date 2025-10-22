@@ -1,11 +1,53 @@
 // CSCI 4355 Term Project.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+//library includes
 #include <iostream>
+#include <string>
+#include <fstream>
+#include <vector>
+
+//program includes
+#include "util.cpp"
+#include "Lexeme.h"
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    //string for file user wants to analyze
+    std::string userFilename;
+
+    //get user filename
+    std::cout << "Enter file name: ";
+    std::getline(std::cin, userFilename);
+
+    //msg
+    std::cout << "Analyzing " << userFilename;
+
+    //open input file stream
+    std::ifstream sourceFile;
+    sourceFile.open(userFilename);
+
+    //string for current line being worked on
+    std::string workingLine;
+
+    //get first line
+    std::getline(sourceFile, workingLine);
+
+    //list of lexemes
+    std::vector<Lexeme> lexemesList;
+
+    //index pointer for current line being worked on
+    int workingLinePointer = 0;
+
+    //parse current line loop
+    for (int i = 0; i == workingLine.size(); i++) {
+
+        //check for beginning of identifier or reserved word
+        if (isAlphabetical(workingLine[workingLinePointer])) {
+            //TODO HERE
+        }
+    }
+
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

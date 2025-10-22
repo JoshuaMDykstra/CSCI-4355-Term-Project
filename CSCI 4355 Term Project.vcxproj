@@ -124,6 +124,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CSCI 4355 Term Project.cpp" />
+    <ClCompile Include="Lexeme.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Lexeme.h" />
+    <ClInclude Include="util.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
