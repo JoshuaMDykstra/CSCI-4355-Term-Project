@@ -11,9 +11,6 @@
 #include "util.cpp"
 #include "Lexeme.h"
 
-//debug setting
-const bool debugFlag = true;
-
 /* instructions
 
 - LEXEMES -
@@ -33,19 +30,21 @@ Rule 01: PROGRAM -> program DECL_SEC begin STMT_SEC end; | program begin STMT_SE
 Rule 02: DECL_SEC -> DECL | DECL DECL_SEC
 Rule 03: DECL -> ID_LIST : TYPE ;
 Rule 04: ID_LIST -> ID | ID , ID_LISTRule 06: STMT_SEC à STMT | STMT STMT_SEC
-Rule 05: ID  (_ | a | b | … | z | A | … | Z) (_ | a | b | … | z | A | … | Z | 0 | 1 | … | 9)*
+*Rule 05: ID  (_ | a | b | … | z | A | … | Z) (_ | a | b | … | z | A | … | Z | 0 | 1 | … | 9)*
 Rule 07: STMT -> ASSIGN | IFSTMT | WHILESTMT | INPUT | OUTPUT
 Rule 08: ASSIGN -> ID := EXPR ;
 Rule 09: IFSTMT -> if COMP then STMT_SEC end if ; | if COMP then STMT_SEC else STMT_SEC end if ;
 Rule 10: WHILESTMT -> while COMP loop STMT_SEC end loop ;
 Rule 11: INPUT -> input ID_LIST;
-Rule 12: OUTPUT -> output ID_LIST | output NUM;
+Rule 12: OUTPUT -> output ID_LIST; | output NUM;
 Rule 13: EXPR -> FACTOR | FACTOR + EXPR | FACTOR - EXPR
 Rule 14: FACTOR -> OPERAND | OPERAND * FACTOR | OPERAND / FACTOR
 Rule 15: OPERAND -> NUM | ID | ( EXPR )
-Rule 16: NUM -> (0 | 1 | ... | 9)+ [.(0 | 1 | … | 9)+]
+*Rule 16: NUM -> (0 | 1 | ... | 9)+ [.(0 | 1 | … | 9)+]
 Rule 17: COMP -> ( OPERAND = OPERAND ) | ( OPERAND <> OPERAND ) | ( OPERAND > OPERAND ) | ( OPERAND < OPERAND )
-Rule 18: TYPE -> int | float | double
+*Rule 18: TYPE -> int | float | double
+ 
+    *does not require implimentation
 
 - ERRORS -
 Upon encountering a variable in a declaration section, you must add it to the symbol table. This means that a 
@@ -63,6 +62,9 @@ happened precisely. Upon encountering an error, you must exit the program immedi
 location.
 
 */
+
+//debug setting
+const bool debugFlag = true;
 
 int main()
 {
@@ -112,10 +114,10 @@ int main()
                 currentLexeme = currentLexeme + workingLine[i];
 
                 //check for multi symbol lexemes
-                if (workingLine[i] == ':' && workingLine[i + 1] == '=') {
+                if (workingLine[i] == ':' and workingLine[i + 1] == '=') {
                     currentLexeme = currentLexeme + workingLine[i + 1];
                     i++;
-                } else if (workingLine[i] == '<' && workingLine[i + 1] == '>') {
+                } else if (workingLine[i] == '<' and workingLine[i + 1] == '>') {
                     currentLexeme = currentLexeme + workingLine[i + 1];
                     i++;
                 }
@@ -145,7 +147,7 @@ int main()
         std::cout << std::endl;
     }
     
-
+    //convert lexeme strings into lexeme objects - merger with previous loop/function?
     std::vector<Lexeme> validLexemes;
 
     for (int i = 0; i < potentialLexemes.size(); i ++) {
@@ -173,11 +175,13 @@ int main()
             }
         }
     }
-    //debugging tool
-    if (debugFlag && potentialLexemes.size() != validLexemes.size()) {
+    
+    //debugging tool - check lexeme vectors against each other
+    if (debugFlag and potentialLexemes.size() != validLexemes.size()) {
         std::cout  << "##### LEXEME VECTORS DISCREPENCY #####" << std::endl << std::endl;
     }
 
+    //debugging tool - print valid lexemes
     if (debugFlag) {
         for (int i = 0; i < validLexemes.size(); i++) {
             std::cout << validLexemes[i].getTypeStr() << ": " << validLexemes[i].getValue() << std::endl;
