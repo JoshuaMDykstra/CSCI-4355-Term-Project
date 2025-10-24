@@ -11,8 +11,14 @@
 #include "util.cpp"
 #include "Lexeme.h"
 
+const bool debugFlag = true;
+
 int main()
 {
+    if (debugFlag) {
+        std::cout << "##### DEBUGGING ON #####" << std::endl << std::endl;
+    }
+
     //string for file user wants to analyze
     std::string userFilename = "test.txt";
 
@@ -30,11 +36,13 @@ int main()
     //string for current line being worked on
     std::string workingLine;
 
+    std::vector<std::string> potentialLexemes;
+
+    //TODO make this OR for loop  a function
     while (std::getline(sourceFile, workingLine)) {
         workingLine = workingLine + '\n';
 
         //
-        std::vector<std::string> potentialLexemes;
         std::string currentLexeme = "";
 
         //scan for potential lexemes
@@ -43,7 +51,7 @@ int main()
             //std::cout << workingLine[i] << std::endl;
             
             //check for symbols
-            if (isSymbol(workingLine[i], 'O')) {
+            if (isOperator(workingLine[i])) {
 
                 if (currentLexeme != "") {
                     potentialLexemes.push_back(currentLexeme);
@@ -76,11 +84,57 @@ int main()
 
             }
         }
+    }
 
+    //debugging tool - print potential lexeme list
+    if (debugFlag) {
         for (int i = 0; i < potentialLexemes.size(); i++) {
-            std::cout << "lexeme: " << potentialLexemes[i] << std::endl;
+            std::cout << "potential lexeme: " << potentialLexemes[i] << std::endl;
+        }
+        std::cout << std::endl;
+    }
+    
+
+    std::vector<Lexeme> validLexemes;
+
+    for (int i = 0; i < potentialLexemes.size(); i ++) {
+
+        //check for reserved words
+        if (isReservedWord(potentialLexemes[i])) {
+            validLexemes.push_back(Lexeme(RESERVED_WORD, potentialLexemes[i]));
+        }
+        //check for identifiers
+        else if (isalpha(potentialLexemes[i][0]) || potentialLexemes[i][0] == '_') {
+                validLexemes.push_back(Lexeme(IDENTIFIER, potentialLexemes[i]));
+        }
+        //check for operators
+        else if (isOperator(potentialLexemes[i][0])) {
+            validLexemes.push_back(Lexeme(OPERATOR, potentialLexemes[i]));
+        }
+
+        //check for number literals
+        for (int j = 0; j < potentialLexemes[i].size(); j++) {
+            if (not std::isdigit(potentialLexemes[i][j])) {
+                break;
+            }
+            else if (potentialLexemes[i].size() == j + 1) {
+                validLexemes.push_back(Lexeme(NUMBER, potentialLexemes[i]));
+            }
         }
     }
+    //debugging tool
+    if (debugFlag && potentialLexemes.size() != validLexemes.size()) {
+        std::cout  << "##### LEXEME VECTORS DISCREPENCY #####" << std::endl << std::endl;
+    }
+
+    if (debugFlag) {
+        for (int i = 0; i < validLexemes.size(); i++) {
+            std::cout << validLexemes[i].getTypeStr() << ": " << validLexemes[i].getValue() << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << "Done :)" << std::endl;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
