@@ -89,7 +89,8 @@ int main()
     //string for current line being worked on
     std::string workingLine;
 
-    std::vector<std::string> potentialLexemes;
+    std::vector<Lexeme> lexemes;
+    int lineNumber = 0;
 
     //TODO make this OR for loop  a function
     while (std::getline(sourceFile, workingLine)) {
@@ -107,7 +108,7 @@ int main()
             if (isOperator(workingLine[i])) {
 
                 if (currentLexeme != "") {
-                    potentialLexemes.push_back(currentLexeme);
+                    lexemes.push_back(Lexeme(UNKNOWN, currentLexeme, lineNumber));
                     currentLexeme = "";
                 }
 
@@ -122,7 +123,7 @@ int main()
                     i++;
                 }
 
-                potentialLexemes.push_back(currentLexeme);
+                lexemes.push_back(Lexeme(UNKNOWN, currentLexeme, lineNumber));
                 currentLexeme = "";
 
             } 
@@ -131,60 +132,48 @@ int main()
                 currentLexeme = currentLexeme + workingLine[i];
 
                 if (workingLine[i + 1] == ' ' || workingLine[i + 1] == '\n') {
-                    potentialLexemes.push_back(currentLexeme);
+                    lexemes.push_back(Lexeme(UNKNOWN, currentLexeme, lineNumber));
                     currentLexeme = "";
                 }
 
             }
         }
+
+        lineNumber++;
     }
 
-    //debugging tool - print potential lexeme list
-    if (debugFlag) {
-        for (int i = 0; i < potentialLexemes.size(); i++) {
-            std::cout << "potential lexeme: " << potentialLexemes[i] << std::endl;
-        }
-        std::cout << std::endl;
-    }
-    
-    //convert lexeme strings into lexeme objects - merger with previous loop/function?
-    std::vector<Lexeme> validLexemes;
+    for (int i = 0; i < lexemes.size(); i ++) {
 
-    for (int i = 0; i < potentialLexemes.size(); i ++) {
+        std::string loadedLexeme = lexemes[i].getValue();
 
         //check for reserved words
-        if (isReservedWord(potentialLexemes[i])) {
-            validLexemes.push_back(Lexeme(RESERVED_WORD, potentialLexemes[i]));
+        if (isReservedWord(loadedLexeme)) {
+            lexemes[i].setType(RESERVED_WORD);
         }
         //check for identifiers
-        else if (isalpha(potentialLexemes[i][0]) || potentialLexemes[i][0] == '_') {
-                validLexemes.push_back(Lexeme(IDENTIFIER, potentialLexemes[i]));
+        else if (isalpha(loadedLexeme[0]) || loadedLexeme[0] == '_') {
+            lexemes[i].setType(IDENTIFIER);
         }
         //check for operators
-        else if (isOperator(potentialLexemes[i][0])) {
-            validLexemes.push_back(Lexeme(OPERATOR, potentialLexemes[i]));
+        else if (isOperator(loadedLexeme[0])) {
+            lexemes[i].setType(OPERATOR);
         }
 
         //check for number literals
-        for (int j = 0; j < potentialLexemes[i].size(); j++) {
-            if (not std::isdigit(potentialLexemes[i][j])) {
+        for (int j = 0; j < loadedLexeme.size(); j++) {
+            if (not std::isdigit(loadedLexeme[j])) {
                 break;
             }
-            else if (potentialLexemes[i].size() == j + 1) {
-                validLexemes.push_back(Lexeme(NUMBER, potentialLexemes[i]));
+            else if (loadedLexeme.size() == j + 1) {
+                lexemes[i].setType(NUMBER);
             }
         }
     }
     
-    //debugging tool - check lexeme vectors against each other
-    if (debugFlag and potentialLexemes.size() != validLexemes.size()) {
-        std::cout  << "##### LEXEME VECTORS DISCREPENCY #####" << std::endl << std::endl;
-    }
-
-    //debugging tool - print valid lexemes
+    //debugging tool - print lexemes
     if (debugFlag) {
-        for (int i = 0; i < validLexemes.size(); i++) {
-            std::cout << validLexemes[i].getTypeStr() << ": " << validLexemes[i].getValue() << std::endl;
+        for (int i = 0; i < lexemes.size(); i++) {
+            std::cout << lexemes[i].getTypeStr() << ": " << lexemes[i].getValue() << std::endl;
         }
         std::cout << std::endl;
     }

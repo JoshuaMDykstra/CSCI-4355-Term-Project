@@ -19,9 +19,11 @@ bool isOperator(char target) {
 //bool function to check if str is a reserved word
 bool isReservedWord(std::string input) {
 
-	const std::string reservedWords[9] = { "begin", "else", "end", "if", "input", "int", "loop", "output", "while" };
+	//Reserved words: program, begin, end, if, then, else, input, output, int, while, loop.
+	const std::string reservedWords[11] = { "program", "begin", "end", "if", "then", "else", "input", "output", "int", "while", "loop" };
 
-	for (int i = 0; i < 9; i++) {
+	//hardcode i < 11; .size() and .sizeof() both break here?????
+	for (int i = 0; i < 11; i++) {
 		if (input == reservedWords[i]) {
 			return true;
 		}

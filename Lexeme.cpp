@@ -1,8 +1,9 @@
 #include "Lexeme.h"
 
-Lexeme::Lexeme(int typeID, std::string lexValue) {
+Lexeme::Lexeme(int typeID, std::string lexValue, int lineNum) {
 	lexemeType = typeID;
 	lexemeValue = lexValue;
+	sourceLine = lineNum;
 }
 
 int Lexeme::getTypeID() {
@@ -24,4 +25,8 @@ std::string Lexeme::getTypeStr() {
 
 std::string Lexeme::getValue() {
 	return lexemeValue;
+}
+
+void Lexeme::setType(int typeID) {
+	lexemeType = typeID;
 }
