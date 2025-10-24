@@ -1,6 +1,4 @@
-#pragma once
-
-#include <string>
+#include "util.h"
 
 //bool function to check if char is in aphabet ignoring case
 bool isOperator(char target) {

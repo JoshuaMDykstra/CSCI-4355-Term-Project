@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClInclude Include="Lexeme.h" />
     <ClInclude Include="util.cpp" />
+    <ClInclude Include="util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -8,7 +8,7 @@
 #include <vector>
 
 //program includes
-#include "util.cpp"
+#include "util.h"
 #include "Lexeme.h"
 
 /* instructions
@@ -108,7 +108,7 @@ int main()
             if (isOperator(workingLine[i])) {
 
                 if (currentLexeme != "") {
-                    lexemes.push_back(Lexeme(UNKNOWN, currentLexeme, lineNumber));
+                    lexemes.push_back(Lexeme(currentLexeme, lineNumber));
                     currentLexeme = "";
                 }
 
@@ -123,7 +123,7 @@ int main()
                     i++;
                 }
 
-                lexemes.push_back(Lexeme(UNKNOWN, currentLexeme, lineNumber));
+                lexemes.push_back(Lexeme(currentLexeme, lineNumber));
                 currentLexeme = "";
 
             } 
@@ -132,7 +132,7 @@ int main()
                 currentLexeme = currentLexeme + workingLine[i];
 
                 if (workingLine[i + 1] == ' ' || workingLine[i + 1] == '\n') {
-                    lexemes.push_back(Lexeme(UNKNOWN, currentLexeme, lineNumber));
+                    lexemes.push_back(Lexeme(currentLexeme, lineNumber));
                     currentLexeme = "";
                 }
 
@@ -140,36 +140,7 @@ int main()
         }
 
         lineNumber++;
-    }
-
-    for (int i = 0; i < lexemes.size(); i ++) {
-
-        std::string loadedLexeme = lexemes[i].getValue();
-
-        //check for reserved words
-        if (isReservedWord(loadedLexeme)) {
-            lexemes[i].setType(RESERVED_WORD);
-        }
-        //check for identifiers
-        else if (isalpha(loadedLexeme[0]) || loadedLexeme[0] == '_') {
-            lexemes[i].setType(IDENTIFIER);
-        }
-        //check for operators
-        else if (isOperator(loadedLexeme[0])) {
-            lexemes[i].setType(OPERATOR);
-        }
-
-        //check for number literals
-        for (int j = 0; j < loadedLexeme.size(); j++) {
-            if (not std::isdigit(loadedLexeme[j])) {
-                break;
-            }
-            else if (loadedLexeme.size() == j + 1) {
-                lexemes[i].setType(NUMBER);
-            }
-        }
-    }
-    
+    } 
     //debugging tool - print lexemes
     if (debugFlag) {
         for (int i = 0; i < lexemes.size(); i++) {

@@ -2,12 +2,15 @@
 
 #include <string>
 
+#include "util.h"
+
 //lexeme types
 #define UNKNOWN 0
-#define RESERVED_WORD 1
-#define OPERATOR 2
-#define IDENTIFIER 3
-#define NUMBER 4
+#define ERROR 1
+#define RESERVED_WORD 2
+#define OPERATOR 3
+#define IDENTIFIER 4
+#define NUMBER 5
 
 class Lexeme
 {
@@ -18,7 +21,7 @@ private:
 
 public:
 //constructor
-	Lexeme(int typeID, std::string lexValue, int lineNum);
+	Lexeme(std::string lexValue, int lineNum);
 
 //getters
 	int getTypeID();
