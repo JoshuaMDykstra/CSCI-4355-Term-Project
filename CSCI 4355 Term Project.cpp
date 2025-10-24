@@ -1,5 +1,4 @@
 // CSCI 4355 Term Project.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
 
 //library includes
 #include <iostream>
@@ -8,7 +7,7 @@
 #include <vector>
 
 //program includes
-#include "util.h"
+#include "utils.h"
 #include "Lexeme.h"
 
 /* instructions

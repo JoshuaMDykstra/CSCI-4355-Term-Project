@@ -125,11 +125,11 @@
   <ItemGroup>
     <ClCompile Include="CSCI 4355 Term Project.cpp" />
     <ClCompile Include="Lexeme.cpp" />
+    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lexeme.h" />
-    <ClInclude Include="util.cpp" />
-    <ClInclude Include="util.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

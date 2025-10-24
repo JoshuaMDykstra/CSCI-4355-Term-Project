@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "util.h"
+#include "utils.h"
 
 //lexeme types
 #define UNKNOWN 0
@@ -31,4 +31,3 @@ public:
 //setters
 	void setType(int typeID);
 };
-
