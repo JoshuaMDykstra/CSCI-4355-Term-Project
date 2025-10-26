@@ -1,15 +1,5 @@
 // CSCI 4355 Term Project.cpp : This file contains the 'main' function. Program execution begins and ends there.
 
-//library includes
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <vector>
-
-//program includes
-#include "utils.h"
-#include "Lexeme.h"
-
 /* instructions
 
 - LEXEMES -
@@ -30,6 +20,7 @@ Rule 02: DECL_SEC -> DECL | DECL DECL_SEC
 Rule 03: DECL -> ID_LIST : TYPE ;
 Rule 04: ID_LIST -> ID | ID , ID_LISTRule 06: STMT_SEC à STMT | STMT STMT_SEC
 *Rule 05: ID  (_ | a | b | … | z | A | … | Z) (_ | a | b | … | z | A | … | Z | 0 | 1 | … | 9)*
+Rule 06: STMT_SEC -> STMT | STMT STMT_SEC
 Rule 07: STMT -> ASSIGN | IFSTMT | WHILESTMT | INPUT | OUTPUT
 Rule 08: ASSIGN -> ID := EXPR ;
 Rule 09: IFSTMT -> if COMP then STMT_SEC end if ; | if COMP then STMT_SEC else STMT_SEC end if ;
@@ -46,6 +37,7 @@ Rule 17: COMP -> ( OPERAND = OPERAND ) | ( OPERAND <> OPERAND ) | ( OPERAND > OP
     *does not require implimentation
 
 - ERRORS -
+
 Upon encountering a variable in a declaration section, you must add it to the symbol table. This means that a 
 redeclaration of a variable should produce an error and exit the program. The use of a variable before it is declared 
 should also produce an error indicating an undeclared identifier and exit the program.
@@ -62,6 +54,17 @@ location.
 
 */
 
+//library includes
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <deque>
+
+//project includes
+#include "utils.h"
+#include "lexeme.h"
+#include "grammar.h"
+
 //debug setting
 const bool debugFlag = true;
 
@@ -74,7 +77,7 @@ int main()
     //string for file user wants to analyze
     std::string userFilename = "test.txt";
 
-    //get user filename
+    //prompt user for filename
     //std::cout << "Enter file name: ";
     //std::getline(std::cin, userFilename);
 
@@ -88,14 +91,18 @@ int main()
     //string for current line being worked on
     std::string workingLine;
 
-    std::vector<Lexeme> lexemes;
+    //vector to store lexemes
+    std::deque<lexeme> lexemes;
+
+    //line tracker
     int lineNumber = 0;
 
     //TODO make this OR for loop  a function
     while (std::getline(sourceFile, workingLine)) {
+        //account for getline removing newline char
         workingLine = workingLine + '\n';
 
-        //
+        //string for working lexeme
         std::string currentLexeme = "";
 
         //scan for potential lexemes
@@ -107,7 +114,7 @@ int main()
             if (isOperator(workingLine[i])) {
 
                 if (currentLexeme != "") {
-                    lexemes.push_back(Lexeme(currentLexeme, lineNumber));
+                    lexemes.push_back(lexeme(currentLexeme, lineNumber));
                     currentLexeme = "";
                 }
 
@@ -122,7 +129,7 @@ int main()
                     i++;
                 }
 
-                lexemes.push_back(Lexeme(currentLexeme, lineNumber));
+                lexemes.push_back(lexeme(currentLexeme, lineNumber));
                 currentLexeme = "";
 
             } 
@@ -131,7 +138,7 @@ int main()
                 currentLexeme = currentLexeme + workingLine[i];
 
                 if (workingLine[i + 1] == ' ' || workingLine[i + 1] == '\n') {
-                    lexemes.push_back(Lexeme(currentLexeme, lineNumber));
+                    lexemes.push_back(lexeme(currentLexeme, lineNumber));
                     currentLexeme = "";
                 }
 
@@ -140,6 +147,7 @@ int main()
 
         lineNumber++;
     } 
+
     //debugging tool - print lexemes
     if (debugFlag) {
         for (int i = 0; i < lexemes.size(); i++) {
@@ -147,7 +155,10 @@ int main()
         }
         std::cout << std::endl;
     }
+    
+    grammar(&lexemes, &lexemes[0]);
 
+    //exit message
     std::cout << "Done :)" << std::endl;
 }
 

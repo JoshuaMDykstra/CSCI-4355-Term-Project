@@ -1,6 +1,7 @@
-#include "Lexeme.h"
+#include "lexeme.h"
 
-Lexeme::Lexeme(std::string lexValue, int lineNum) {
+//constructor
+lexeme::lexeme(std::string lexValue, int lineNum) {
 	lexemeValue = lexValue;
 	sourceLine = lineNum;
     lexemeType = ERROR;
@@ -18,22 +19,25 @@ Lexeme::Lexeme(std::string lexValue, int lineNum) {
         lexemeType = OPERATOR;
     }
     //check for number literals
-    else if (isdigit(lexValue[0]))
-    for (int i = 0; i < lexValue.size(); i++) {
-        if (not std::isdigit(lexValue[i])) {
-            lexemeType = ERROR;
-        }
-        else if (lexValue.size() == i + 1) {
-            lexemeType = NUMBER;
+    else if (isdigit(lexValue[0])) {
+
+        for (int i = 0; i < lexValue.size(); i++) {
+            if (not std::isdigit(lexValue[i])) {
+                lexemeType = ERROR;
+            }
+            else if (lexValue.size() == i + 1) {
+                lexemeType = NUMBER;
+            }
         }
     }
 }
 
-int Lexeme::getTypeID() {
+//getters
+int lexeme::getTypeID() {
 	return lexemeType;
 }
 
-std::string Lexeme::getTypeStr() {
+std::string lexeme::getTypeStr() {
 	switch (lexemeType) {
 	case 2:
 		return "RESERVED_WORD";
@@ -48,10 +52,15 @@ std::string Lexeme::getTypeStr() {
 	}
 }
 
-std::string Lexeme::getValue() {
+std::string lexeme::getValue() {
 	return lexemeValue;
 }
 
-void Lexeme::setType(int typeID) {
+int lexeme::getSourceLine() {
+    return sourceLine;
+}
+
+//setters
+void lexeme::setType(int typeID) {
 	lexemeType = typeID;
 }

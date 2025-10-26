@@ -1,7 +1,9 @@
 #pragma once
 
+//library includes
 #include <string>
 
+//project includes
 #include "utils.h"
 
 //lexeme types
@@ -12,21 +14,23 @@
 #define IDENTIFIER 4
 #define NUMBER 5
 
-class Lexeme
+class lexeme
 {
 private:
+//attributes
 	int lexemeType;
 	std::string lexemeValue;
 	int sourceLine;
 
 public:
 //constructor
-	Lexeme(std::string lexValue, int lineNum);
+	lexeme(std::string lexValue, int lineNum);
 
 //getters
 	int getTypeID();
 	std::string getTypeStr();
 	std::string getValue();
+	int getSourceLine();
 
 //setters
 	void setType(int typeID);
