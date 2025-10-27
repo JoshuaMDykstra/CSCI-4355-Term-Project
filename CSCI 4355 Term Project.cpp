@@ -64,10 +64,6 @@ location.
 #include "utils.h"
 #include "lexeme.h"
 #include "grammar.h"
-
-//debug setting
-const bool debugFlag = true;
-
 int main()
 {
     if (debugFlag) {
@@ -156,7 +152,7 @@ int main()
         std::cout << std::endl;
     }
     
-    grammar(&lexemes, &lexemes[0]);
+    grammar runGrammar(&lexemes);
 
     //exit message
     std::cout << "Done :)" << std::endl;

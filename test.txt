@@ -1,7 +1,6 @@
 program x, y: int;
 begin
  input x,y;
- x:=x+10
  y:=x+y;
  output y;
 end;
