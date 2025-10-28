@@ -9,19 +9,24 @@
 
 class grammar {
 
+public:
+	//constructor
+	grammar(std::deque<lexeme>* quePtr);
+
 private:
+
+	//attributes
 	std::deque<lexeme>* lexemeList;
 	std::string errorMessage;
 	std::vector<std::string> tokens;
 
-
-
+	//debugging, error, and output functions
 	void grammarError();
-
 	void debugMsg(std::string msg);
 	void debugLex(lexeme inputLex);
 	void printTokens();
 
+	//grammar rule functions
 	bool PROGRAM();
 	void DECL_SEC();
 	bool DECL();
@@ -40,9 +45,7 @@ private:
 	bool NUM();
 	bool COMP();
 	bool TYPE();
+
+	//convenience function
 	bool checkSemicolon();
-
-public:
-	grammar(std::deque<lexeme>* quePtr);
-
 };

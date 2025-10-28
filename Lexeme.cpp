@@ -21,6 +21,7 @@ lexeme::lexeme(std::string lexValue, int lineNum) {
     //check for number literals
     else if (isdigit(lexValue[0])) {
 
+        //check all following characters are numbers
         for (int i = 0; i < lexValue.size(); i++) {
             if (not std::isdigit(lexValue[i])) {
                 lexemeType = ERROR;
@@ -38,6 +39,8 @@ int lexeme::getTypeID() {
 }
 
 std::string lexeme::getTypeStr() {
+
+    //switch to decode type id
 	switch (lexemeType) {
 	case 2:
 		return "RESERVED_WORD";

@@ -109,14 +109,16 @@ int main()
             //check for symbols
             if (isOperator(workingLine[i])) {
 
+                //clear empty lexeme
                 if (currentLexeme != "") {
                     lexemes.push_back(lexeme(currentLexeme, lineNumber));
                     currentLexeme = "";
                 }
 
+                //add current char to working lexeme
                 currentLexeme = currentLexeme + workingLine[i];
 
-                //check for multi symbol lexemes
+                //check for multi symbol lexemes := and <>
                 if (workingLine[i] == ':' and workingLine[i + 1] == '=') {
                     currentLexeme = currentLexeme + workingLine[i + 1];
                     i++;
@@ -125,14 +127,18 @@ int main()
                     i++;
                 }
 
+                //add finished lexeme to vector and reset
                 lexemes.push_back(lexeme(currentLexeme, lineNumber));
                 currentLexeme = "";
 
             } 
+
+            //check for alphanumeric symbol
             else if (workingLine[i] != ' ') {
 
                 currentLexeme = currentLexeme + workingLine[i];
 
+                //push working lexeme to vector if next symbol is space
                 if (workingLine[i + 1] == ' ' || workingLine[i + 1] == '\n') {
                     lexemes.push_back(lexeme(currentLexeme, lineNumber));
                     currentLexeme = "";
@@ -141,6 +147,7 @@ int main()
             }
         }
 
+        //incriment line number
         lineNumber++;
     } 
 
@@ -152,6 +159,7 @@ int main()
         std::cout << std::endl;
     }
     
+    //run grammar logic
     grammar runGrammar(&lexemes);
 
     //exit message
