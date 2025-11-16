@@ -1,7 +1,5 @@
 #include "grammar.h"
 
-#define NEXTLEX debugLex(lexemeList->front()); lexemeList->pop_front();
-
 //constructor
 grammar::grammar(std::deque<lexeme>* quePtr) {
 	
@@ -9,16 +7,25 @@ grammar::grammar(std::deque<lexeme>* quePtr) {
 	lexemeList = quePtr;
 	
 	//default error msg
-	errorMessage = "UNKNOWN GRAMMAR ERROR";
+	//errorMessage;
+
+	if (true) { printLexemes(); }
 
 	//run grammar logic
 	if (not PROGRAM()) {
+
+		std::cout << "!!!FAIL!!! - " << errorMessage << std::endl;
+
+		std::cout << "Front Lexeme: " << lexemeList->front().getValue() << " Line: " 
+			<< std::to_string(lexemeList->front().getSourceLine()) << std::endl;
 
 		//output tokens and error msg if failed
 		printTokens();
 		grammarError();
 	}
 	else {
+
+		std::cout << "!!!SUCCESS!!!" << std::endl;
 
 		//output tokens if succeed
 		printTokens();
@@ -52,6 +59,23 @@ void grammar::debugLex(lexeme inputLex) {
 	}
 }
 
+void grammar::printLexemes() {
+	int lineNum = 0;
+
+	for (int i = 0; i < lexemeList->size(); i++) {
+
+		if (lineNum < lexemeList->at(i).getSourceLine()) {
+			lineNum++;
+
+			std::cout << std::endl << "Line " << lineNum << ": ";
+		}
+
+		std::cout << "\"" << lexemeList->at(i).getValue() << "\" ";
+	}
+
+	std::cout << std::endl << std::endl;
+}
+
 //print token function
 void grammar::printTokens() {
 
@@ -62,8 +86,19 @@ void grammar::printTokens() {
 	}
 
 	//loop through token vector and print them
-	for (int i = 0; i < tokens.size(); i++)
+	for (int i = 0; i < tokens.size(); i++) {
+
+		if (debugFlag) {
+
+			if (i < 9) {
+				std::cout << " ";
+			}
+
+			std::cout << i + 1 << "   ";
+		}
+
 		std::cout << tokens[i] << std::endl;
+	}
 }
 
 //Rule 01: PROGRAM->program DECL_SEC begin STMT_SEC end; | program begin STMT_SEC end;
@@ -73,12 +108,8 @@ bool grammar::PROGRAM() {
 	tokens.push_back("PROGRAM");
 
 	//check for program keyword
-	if (lexemeList->front().getValue() == "program") {
-		debugLex(lexemeList->front());
-		lexemeList->pop_front();
-	}
-	else {
-		errorMessage = "ERROR !! reserved word: program missing on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
+	if (not checkLexeme("program")) {
+		tokens.pop_back(); 
 		return false;
 	}
 
@@ -86,12 +117,8 @@ bool grammar::PROGRAM() {
 	DECL_SEC();
 
 	//check for begin keyword
-	if (lexemeList->front().getValue() == "begin") {
-		debugLex(lexemeList->front());
-		lexemeList->pop_front();
-	}
-	else {
-		errorMessage = "ERROR !! reserved word: begin missing on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
+	if (not checkLexeme("begin")) {
+		tokens.pop_back();
 		return false;
 	}
 
@@ -101,34 +128,33 @@ bool grammar::PROGRAM() {
 	}
 
 	//check for end keyword and semicolon
-	if (lexemeList->front().getValue() == "end") {
-		debugLex(lexemeList->front());
-		lexemeList->pop_front();
-		if (not checkSemicolon()) {
-			return false;
-		}
-	}
-	else {
-		errorMessage = "ERROR !! reserved word: end missing on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
+	if (not checkLexeme("end")) {
+		tokens.pop_back();
 		return false;
 	}
+	if (not checkLexeme(";")) {
+		tokens.pop_back();
+		return false;
+		}
 
 	//return true on success
 	return true;
 }
 
 //Rule 02: DECL_SEC->DECL | DECL DECL_SEC
-void grammar::DECL_SEC() {
+bool grammar::DECL_SEC() {
 
 	//add token to list
 	tokens.push_back("DECL_SEC");
 
-	//loop DECL() until failure
-	while (true) {
-		if (not DECL()) {
-			break;
-		}
+	if (not DECL()) {
+		tokens.pop_back();
+		return false;
 	}
+
+	DECL_SEC();
+
+	return true;
 }
 
 //Rule 03 : DECL->ID_LIST : TYPE;
@@ -138,21 +164,16 @@ bool grammar::DECL() {
 	tokens.push_back("DECL");
 
 	//fail and remove token if ID_LIST not found
-	if (ID_LIST() == false) {
+	if (not ID_LIST()) {
 		tokens.pop_back();
 		return false;
 	}
 	
 	//check for colon
-	if (lexemeList->front().getValue() == ":") {
-		debugLex(lexemeList->front());
-		lexemeList->pop_front();
-	}
-	else {
-		errorMessage = "ERROR !! missing colon on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
+	if (not checkLexeme(":")) {
 		tokens.pop_back();
 		return false;
-	} 
+	}
 
 	//check for TYPE, return false if fail
 	if (not TYPE()) {
@@ -161,7 +182,7 @@ bool grammar::DECL() {
 	}
 
 	//check for semicolon
-	if (not checkSemicolon()) {
+	if (not checkLexeme(";")) {
 		return false;
 	}
 
@@ -179,17 +200,13 @@ bool grammar::ID_LIST() {
 	if (ID()) {
 
 	//check for another ID_LIST if comma found
-		if (lexemeList->front().getValue() == ",") {
-
-			debugLex(lexemeList->front());
-			lexemeList->pop_front();
-
+		if (checkLexeme(",")) {
 			ID_LIST();
 		}
 		return true;
 	}
 	else {
-		errorMessage = "ERROR !! impropper id list on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
+		//errorMessage = "ERROR !! impropper id list on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
 		tokens.pop_back();
 		return false;
 	}
@@ -198,18 +215,13 @@ bool grammar::ID_LIST() {
 //Rule 05 : ID(_ | a | b | … | z | A | … | Z) (_ | a | b | … | z | A | … | Z | 0 | 1 | … | 9) *
 bool grammar::ID() {
 
-	//add token if debug flag on
-	if (debugFlag) {
-		tokens.push_back("DEBUG_ID");
-	}
-
 	//fail if lexeme type id is incorrect
 	if (lexemeList->front().getTypeID() == IDENTIFIER) {
 		debugLex(lexemeList->front());
 		lexemeList->pop_front();
 	}
 	else {
-		errorMessage = "ERROR !! impropper identifier on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
+		//errorMessage = "ERROR !! impropper identifier on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
 		return false;
 	}
 
@@ -235,7 +247,7 @@ bool grammar::STMT_SEC() {
 	//return false and remove token if fail
 	else {
 		tokens.pop_back();
-		errorMessage = "ERROR !! impropper statement section on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
+		//errorMessage = "ERROR !! impropper statement section on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
 		return false;
 	}
 }
@@ -264,50 +276,123 @@ bool grammar::ASSIGN() {
 	tokens.push_back("ASSIGN");
 
 	//check for ID
-	if (ID()) {
-
-		//check for := oporator
-		if (lexemeList->front().getValue() == ":=") {
-
-			debugLex(lexemeList->front());
-			lexemeList->pop_front();
-
-			//check for EXPR and semicolon
-			if (EXPR()) {
-				if (checkSemicolon()) {
-					return true;
-				}
-				else {
-					tokens.pop_back();
-					return false;
-				}
-			}
-		}
+	if (not ID()) {
+		tokens.pop_back();
+		return false;
 	}
 
-	//return false and remove token if any check fails
-	tokens.pop_back();
-	return false;
+	//check for := oporator
+	if (not checkLexeme(":=")) {
+		tokens.pop_back();
+		return false;
+	}
+	
+	//check for EXPR and semicolon
+	if (not EXPR()) {
+		tokens.pop_back();
+		return false;
+	}
+	if (not checkLexeme(";")) {
+		tokens.pop_back();
+		return false;
+	}
+
+	//retrun true if all checks pass
+	return true;
 }
 
 //Rule 09: IFSTMT -> if COMP then STMT_SEC end if; | if COMP then STMT_SEC else STMT_SEC end if;
 bool grammar::IFSTMT() {
 
-	//TODO
 	tokens.push_back("IFSTMT");
-	
-	tokens.pop_back();
-	return false;
+
+	//check for if keyword
+	if (not checkLexeme("if")) {
+		tokens.pop_back();
+		return false;
+	}
+
+	if (not COMP()) {
+		tokens.pop_back();
+		return false;
+	}
+
+	if (not checkLexeme("then")) {
+		tokens.pop_back();
+		return false;
+	}
+
+	if (not STMT_SEC()) {
+		tokens.pop_back();
+		return false;
+	}
+
+	if (checkLexeme("else")) {
+		if (not STMT_SEC()) {
+			tokens.pop_back();
+			return false;
+		}
+	}
+
+	if (not checkLexeme("end")) {
+		tokens.pop_back();
+		return false;
+	}
+
+	if (not checkLexeme("if")) {
+		tokens.pop_back();
+		return false;
+	}
+
+	if (not checkLexeme(";")) {
+		tokens.pop_back();
+		return false;
+	}
+
+	return true;
 }
 
 //Rule 10: WHILESTMT -> while COMP loop STMT_SEC end loop;
 bool grammar::WHILESTMT() {
 
-	//TODO
 	tokens.push_back("WHILESTMT");
+
+	if (not checkLexeme("while")) {
+		tokens.pop_back();
+		return false;
+	}
 	
-	tokens.pop_back();
-	return false;
+	if (not COMP()) {
+		tokens.pop_back();
+		return false;
+	}
+
+	if (not checkLexeme("loop")) {
+		tokens.pop_back();
+		return false;
+	}
+
+	if (not STMT_SEC()) {
+		tokens.pop_back();
+		return false;
+	}
+
+	if (not checkLexeme("end")) {
+		tokens.pop_back();
+		return false;
+	}
+
+	if (not checkLexeme("loop")) {
+		tokens.pop_back();
+		return false;
+	}
+
+	if (not checkLexeme(";")) {
+		tokens.pop_back();
+		return false;
+	}
+
+	return true;
 }
 
 //Rule 11: INPUT->input ID_LIST;
@@ -317,12 +402,11 @@ bool grammar::INPUT() {
 	tokens.push_back("INPUT");
 
 	//check for input keyword
-	if (lexemeList->front().getValue() == "input") {
-		lexemeList->pop_front();
+	if (checkLexeme("input")) {
 
 		//check for ID_LIST and semicolon
 		if (ID_LIST()) {
-			if (checkSemicolon()) {
+			if (checkLexeme(";")) {
 				return true;
 			}
 
@@ -355,7 +439,7 @@ bool grammar::OUTPUT() {
 
 		//check for ID_LIST and semicolon, return false and remove token on semicolon fail
 		if (ID_LIST()) {
-			if (checkSemicolon()) {
+			if (checkLexeme(";")) {
 				return true;
 			}
 			else {
@@ -366,7 +450,7 @@ bool grammar::OUTPUT() {
 
 		//check for NUM and semicolon, return false and remove token on semicolon fail
 		else if (NUM()) {
-			if (checkSemicolon()) {
+			if (checkLexeme(";")) {
 				return true;
 			}
 			else {
@@ -449,7 +533,7 @@ bool grammar::FACTOR() {
 }
 
 //Rule 15 : OPERAND->NUM | ID | (EXPR)
-bool grammar::OPERAND() {
+ bool grammar::OPERAND() {
 
 	//add token to list
 	tokens.push_back("OPERAND");
@@ -471,11 +555,6 @@ bool grammar::OPERAND() {
 //Rule 16 : NUM -> (0 | 1 | ... | 9) + [.(0 | 1 | … | 9) + ]
 bool grammar::NUM() {
 
-	//add token to list if debug flag on
-	if (debugFlag) {
-		tokens.push_back("DEBUG_NUM");
-	}
-
 	//check lexeme is NUMBER type
 	if (lexemeList->front().getTypeID() == NUMBER) {
 		debugLex(lexemeList->front());
@@ -483,7 +562,7 @@ bool grammar::NUM() {
 	}
 	//return false on fail
 	else {
-		errorMessage = "ERROR !! impropper number literal on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
+		//errorMessage = "ERROR !! impropper number literal on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
 		return false;
 	}
 
@@ -493,19 +572,45 @@ bool grammar::NUM() {
 //Rule 17 : COMP -> (OPERAND = OPERAND) | (OPERAND <> OPERAND) | (OPERAND > OPERAND) | (OPERAND < OPERAND)
 bool grammar::COMP() {
 
-	//TODO
 	tokens.push_back("COMP");
 
-	return false;
+	if (not checkLexeme("(")) {
+		tokens.pop_back();
+		return false;
+	}
+
+	if (not OPERAND()) {
+		tokens.pop_back();
+		return false;
+	}
+
+	//const array of valid types
+	const std::string validOperators[4] = { "=", "<>", ">", "<"};
+
+	//return true if lexeme matches a valid operator
+	for (int i = 0; i < 3; i++) {
+		if (lexemeList->front().getValue() == validOperators[i]) {
+			debugLex(lexemeList->front());
+			lexemeList->pop_front();
+			break;
+		}
+	}
+
+	if (not OPERAND()) {
+		tokens.pop_back();
+		return false;
+	}
+
+	if (not checkLexeme(")")) {
+		tokens.pop_back();
+		return false;
+	}
+
+	return true;
 }
 
 //Rule 18 : TYPE -> int | float | double
 bool grammar::TYPE() {
-
-	//add token to list if debug flag on
-	if (debugFlag) {
-		tokens.push_back("DEBUG_TYPE");
-	}
 
 	//const array of valid types
 	const std::string validTypes[3] = { "int", "float", "double" };
@@ -523,17 +628,18 @@ bool grammar::TYPE() {
 	return false;
 }
 
-bool grammar::checkSemicolon() {
+bool grammar::checkLexeme(std::string word) {
 	
 	//pop lexeme and return true if next lexeme if semicolon
-	if (lexemeList->front().getValue() == ";") {
+	if (lexemeList->front().getValue() == word) {
 		debugLex(lexemeList->front());
 		lexemeList->pop_front();
 		return true;
 	}
 	//return false on fail
-	else {
-		errorMessage = "ERROR !! semicolon missing on line " + lexemeList->front().getSourceLine() + '.';
+	else if (word != "end") {
+		errorMessage = "ERROR !! " + word + " missing on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
 		return false;
 	}
+	else { return false; }
 }

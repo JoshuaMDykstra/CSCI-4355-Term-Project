@@ -126,11 +126,13 @@
     <ClCompile Include="CSCI 4355 Term Project.cpp" />
     <ClCompile Include="grammar.cpp" />
     <ClCompile Include="lexeme.cpp" />
+    <ClCompile Include="scanner.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="grammar.h" />
     <ClInclude Include="lexeme.h" />
+    <ClInclude Include="scanner.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

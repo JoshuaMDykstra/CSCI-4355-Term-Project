@@ -4,7 +4,16 @@
 #include <string>
 
 //debug setting
-const bool debugFlag = false;
+const bool debugFlag = true;
+
+enum lexemeType {
+	UNKNOWN,
+	ERROR,
+	RESERVED_WORD,
+	OPERATOR,
+	IDENTIFIER,
+	NUMBER
+};
 
 //prototypes
 bool isOperator(char target);

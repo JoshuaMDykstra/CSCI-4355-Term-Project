@@ -3,20 +3,20 @@
 //constructor
 lexeme::lexeme(std::string lexValue, int lineNum) {
 	lexemeValue = lexValue;
-	sourceLine = lineNum;
-    lexemeType = ERROR;
+	sourceLine = lineNum + 1;
+    lexType = ERROR;
 
     //check for reserved words
     if (isReservedWord(lexValue)) {
-        lexemeType = RESERVED_WORD;
+        lexType = RESERVED_WORD;
     }
     //check for identifiers
     else if (isalpha(lexValue[0]) || lexValue[0] == '_') {
-        lexemeType = IDENTIFIER;
+        lexType = IDENTIFIER;
     }
     //check for operators
     else if (isOperator(lexValue[0])) {
-        lexemeType = OPERATOR;
+        lexType = OPERATOR;
     }
     //check for number literals
     else if (isdigit(lexValue[0])) {
@@ -24,10 +24,10 @@ lexeme::lexeme(std::string lexValue, int lineNum) {
         //check all following characters are numbers
         for (int i = 0; i < lexValue.size(); i++) {
             if (not std::isdigit(lexValue[i])) {
-                lexemeType = ERROR;
+                lexType = ERROR;
             }
             else if (lexValue.size() == i + 1) {
-                lexemeType = NUMBER;
+                lexType = NUMBER;
             }
         }
     }
@@ -35,13 +35,13 @@ lexeme::lexeme(std::string lexValue, int lineNum) {
 
 //getters
 int lexeme::getTypeID() {
-	return lexemeType;
+	return lexType;
 }
 
 std::string lexeme::getTypeStr() {
 
     //switch to decode type id
-	switch (lexemeType) {
+	switch (lexType) {
 	case 2:
 		return "RESERVED_WORD";
 	case 3:
@@ -64,6 +64,6 @@ int lexeme::getSourceLine() {
 }
 
 //setters
-void lexeme::setType(int typeID) {
-	lexemeType = typeID;
+void lexeme::setType(lexemeType typeID) {
+	lexType = typeID;
 }

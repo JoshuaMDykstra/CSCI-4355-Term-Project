@@ -64,6 +64,19 @@ location.
 #include "utils.h"
 #include "lexeme.h"
 #include "grammar.h"
+#include "scanner.h"
+
+const std::string files[100]{
+    "test.txt",
+    "TestCases-1\\input1.txt", //pass
+    "TestCases-1\\input2.txt", //pass
+    "TestCases-1\\input3.txt", //implement identifier checking
+    "TestCases-1\\input4.txt", //not catch missing semi
+    "TestCases-1\\input5.txt", //pass
+    "TestCases-1\\input6.txt"  //pass
+
+};
+
 int main()
 {
     if (debugFlag) {
@@ -71,108 +84,16 @@ int main()
     }
 
     //string for file user wants to analyze
-    std::string userFilename = "test.txt";
+    std::string inputFile = files[6];
 
     //prompt user for filename
     //std::cout << "Enter file name: ";
-    //std::getline(std::cin, userFilename);
+    //std::getline(std::cin, inputFile);
 
-    //msg
-    std::cout << "Analyzing " << userFilename << std::endl << std::endl;
-
-    //open input file stream
-    std::ifstream sourceFile;
-    sourceFile.open(userFilename);
-
-    //string for current line being worked on
-    std::string workingLine;
-
-    //vector to store lexemes
-    std::deque<lexeme> lexemes;
-
-    //line tracker
-    int lineNumber = 0;
-
-    //TODO make this OR for loop  a function
-    while (std::getline(sourceFile, workingLine)) {
-        //account for getline removing newline char
-        workingLine = workingLine + '\n';
-
-        //string for working lexeme
-        std::string currentLexeme = "";
-
-        //scan for potential lexemes
-        for (int i = 0; i < workingLine.size(); i++) {
-
-            //std::cout << workingLine[i] << std::endl;
-            
-            //check for symbols
-            if (isOperator(workingLine[i])) {
-
-                //clear empty lexeme
-                if (currentLexeme != "") {
-                    lexemes.push_back(lexeme(currentLexeme, lineNumber));
-                    currentLexeme = "";
-                }
-
-                //add current char to working lexeme
-                currentLexeme = currentLexeme + workingLine[i];
-
-                //check for multi symbol lexemes := and <>
-                if (workingLine[i] == ':' and workingLine[i + 1] == '=') {
-                    currentLexeme = currentLexeme + workingLine[i + 1];
-                    i++;
-                } else if (workingLine[i] == '<' and workingLine[i + 1] == '>') {
-                    currentLexeme = currentLexeme + workingLine[i + 1];
-                    i++;
-                }
-
-                //add finished lexeme to vector and reset
-                lexemes.push_back(lexeme(currentLexeme, lineNumber));
-                currentLexeme = "";
-
-            } 
-
-            //check for alphanumeric symbol
-            else if (workingLine[i] != ' ') {
-
-                currentLexeme = currentLexeme + workingLine[i];
-
-                //push working lexeme to vector if next symbol is space
-                if (workingLine[i + 1] == ' ' || workingLine[i + 1] == '\n') {
-                    lexemes.push_back(lexeme(currentLexeme, lineNumber));
-                    currentLexeme = "";
-                }
-
-            }
-        }
-
-        //incriment line number
-        lineNumber++;
-    } 
-
-    //debugging tool - print lexemes
-    if (debugFlag) {
-        for (int i = 0; i < lexemes.size(); i++) {
-            std::cout << lexemes[i].getTypeStr() << ": " << lexemes[i].getValue() << std::endl;
-        }
-        std::cout << std::endl;
-    }
-    
-    //run grammar logic
-    grammar runGrammar(&lexemes);
+    //for (int i = 0; i < 10; i++) {
+        scan(inputFile);
+    //}
 
     //exit message
     std::cout << "Done :)" << std::endl;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

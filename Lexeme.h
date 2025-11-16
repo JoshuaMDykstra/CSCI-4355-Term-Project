@@ -6,19 +6,11 @@
 //project includes
 #include "utils.h"
 
-//lexeme types
-#define UNKNOWN 0
-#define ERROR 1
-#define RESERVED_WORD 2
-#define OPERATOR 3
-#define IDENTIFIER 4
-#define NUMBER 5
-
 class lexeme
 {
 private:
 //attributes
-	int lexemeType;
+	lexemeType lexType;
 	std::string lexemeValue;
 	int sourceLine;
 
@@ -33,5 +25,5 @@ public:
 	int getSourceLine();
 
 //setters
-	void setType(int typeID);
+	void setType(lexemeType typeID);
 };

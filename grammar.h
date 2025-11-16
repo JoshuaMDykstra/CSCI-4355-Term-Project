@@ -17,18 +17,19 @@ private:
 
 	//attributes
 	std::deque<lexeme>* lexemeList;
-	std::string errorMessage;
+	std::string errorMessage = "UNKNOWN GRAMMAR ERROR";
 	std::vector<std::string> tokens;
 
 	//debugging, error, and output functions
 	void grammarError();
 	void debugMsg(std::string msg);
 	void debugLex(lexeme inputLex);
+	void printLexemes();
 	void printTokens();
 
 	//grammar rule functions
 	bool PROGRAM();
-	void DECL_SEC();
+	bool DECL_SEC();
 	bool DECL();
 	bool ID_LIST();
 	bool ID();
@@ -47,5 +48,5 @@ private:
 	bool TYPE();
 
 	//convenience function
-	bool checkSemicolon();
+	bool checkLexeme(std::string word);
 };
