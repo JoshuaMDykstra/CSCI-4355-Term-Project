@@ -4,7 +4,7 @@
 #include <string>
 
 //debug setting
-const bool debugFlag = true;
+const bool debugFlag = false;
 
 enum lexemeType {
 	UNKNOWN,

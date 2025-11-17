@@ -19,6 +19,8 @@ private:
 	std::deque<lexeme>* lexemeList;
 	std::string errorMessage = "UNKNOWN GRAMMAR ERROR";
 	std::vector<std::string> tokens;
+	bool declerationSectionFlag = true;
+	std::vector<std::string> declaredIdentifiers;
 
 	//debugging, error, and output functions
 	void grammarError();
@@ -49,4 +51,5 @@ private:
 
 	//convenience function
 	bool checkLexeme(std::string word);
+	bool identifierDeclared();
 };

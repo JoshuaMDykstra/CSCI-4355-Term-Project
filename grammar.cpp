@@ -14,18 +14,10 @@ grammar::grammar(std::deque<lexeme>* quePtr) {
 	//run grammar logic
 	if (not PROGRAM()) {
 
-		std::cout << "!!!FAIL!!! - " << errorMessage << std::endl;
-
-		std::cout << "Front Lexeme: " << lexemeList->front().getValue() << " Line: " 
-			<< std::to_string(lexemeList->front().getSourceLine()) << std::endl;
-
 		//output tokens and error msg if failed
-		printTokens();
 		grammarError();
 	}
 	else {
-
-		std::cout << "!!!SUCCESS!!!" << std::endl;
 
 		//output tokens if succeed
 		printTokens();
@@ -35,10 +27,11 @@ grammar::grammar(std::deque<lexeme>* quePtr) {
 //grammar error funtion
 void grammar::grammarError() {
 
+	printTokens();
+
 	//print error msg and exit
 	std::cout << errorMessage << std::endl;
-	exit(1);
-	
+	exit(2);
 }
 
 //standard debugging msg function
@@ -109,8 +102,7 @@ bool grammar::PROGRAM() {
 
 	//check for program keyword
 	if (not checkLexeme("program")) {
-		tokens.pop_back(); 
-		return false;
+		grammarError();
 	}
 
 	//run DECL_SEC if one exists
@@ -118,9 +110,10 @@ bool grammar::PROGRAM() {
 
 	//check for begin keyword
 	if (not checkLexeme("begin")) {
-		tokens.pop_back();
-		return false;
+		grammarError();
 	}
+
+	declerationSectionFlag = false;
 
 	//run STMT_SEC logic, return false if fail
 	if (not STMT_SEC()) {
@@ -129,8 +122,7 @@ bool grammar::PROGRAM() {
 
 	//check for end keyword and semicolon
 	if (not checkLexeme("end")) {
-		tokens.pop_back();
-		return false;
+		grammarError();
 	}
 	if (not checkLexeme(";")) {
 		tokens.pop_back();
@@ -216,17 +208,30 @@ bool grammar::ID_LIST() {
 bool grammar::ID() {
 
 	//fail if lexeme type id is incorrect
-	if (lexemeList->front().getTypeID() == IDENTIFIER) {
-		debugLex(lexemeList->front());
-		lexemeList->pop_front();
-	}
-	else {
-		//errorMessage = "ERROR !! impropper identifier on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
+	if (lexemeList->front().getTypeID() != IDENTIFIER) {
 		return false;
 	}
 
-	//return true on success
-	return true;
+	//if in decleration section, add identifier to list of declared identifiers and return true
+	if (declerationSectionFlag) {
+		declaredIdentifiers.push_back(lexemeList->front().getValue());
+
+		debugLex(lexemeList->front());
+		lexemeList->pop_front();
+		return true;
+	}
+	else {
+		//if not in decleration section and identifier was previously declared return true, exit if not
+		if (identifierDeclared()) {
+			debugLex(lexemeList->front());
+			lexemeList->pop_front();
+			return true;
+		}
+		else {
+			errorMessage = "ERROR !! identifier " + lexemeList->front().getValue() + " not declared in line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
+			grammarError();
+		}
+	}
 }
 
 //Rule 06: STMT_SEC->STMT | STMT STMT_SEC
@@ -293,8 +298,7 @@ bool grammar::ASSIGN() {
 		return false;
 	}
 	if (not checkLexeme(";")) {
-		tokens.pop_back();
-		return false;
+		grammarError();
 	}
 
 	//retrun true if all checks pass
@@ -312,21 +316,24 @@ bool grammar::IFSTMT() {
 		return false;
 	}
 
+	//check for COMP
 	if (not COMP()) {
 		tokens.pop_back();
 		return false;
 	}
 
+	//check for then keyword
 	if (not checkLexeme("then")) {
-		tokens.pop_back();
-		return false;
+		grammarError();
 	}
 
+	//check for STMT_SEC
 	if (not STMT_SEC()) {
 		tokens.pop_back();
 		return false;
 	}
 
+	//check for else keyword
 	if (checkLexeme("else")) {
 		if (not STMT_SEC()) {
 			tokens.pop_back();
@@ -334,21 +341,22 @@ bool grammar::IFSTMT() {
 		}
 	}
 
+	//check for end keyword
 	if (not checkLexeme("end")) {
-		tokens.pop_back();
-		return false;
+		grammarError();
 	}
 
+	//check for if keyword
 	if (not checkLexeme("if")) {
-		tokens.pop_back();
-		return false;
+		grammarError();
 	}
 
+	//check for semicolon
 	if (not checkLexeme(";")) {
-		tokens.pop_back();
-		return false;
+		grammarError();
 	}
 
+	//return true if all checks passed
 	return true;
 }
 
@@ -357,39 +365,42 @@ bool grammar::WHILESTMT() {
 
 	tokens.push_back("WHILESTMT");
 
+	//check for while keyword
 	if (not checkLexeme("while")) {
 		tokens.pop_back();
 		return false;
 	}
 	
+	//check for COMP
 	if (not COMP()) {
 		tokens.pop_back();
 		return false;
 	}
 
+	//check for loop keyword
 	if (not checkLexeme("loop")) {
-		tokens.pop_back();
-		return false;
+		grammarError();
 	}
 
+	//check for STMT_SEC
 	if (not STMT_SEC()) {
 		tokens.pop_back();
 		return false;
 	}
 
+	//check for end keyword
 	if (not checkLexeme("end")) {
-		tokens.pop_back();
-		return false;
+		grammarError();
 	}
 
+	//check for loop keyword
 	if (not checkLexeme("loop")) {
-		tokens.pop_back();
-		return false;
+		grammarError();
 	}
 
+	//check for semicolon
 	if (not checkLexeme(";")) {
-		tokens.pop_back();
-		return false;
+		grammarError();
 	}
 
 	return true;
@@ -402,29 +413,23 @@ bool grammar::INPUT() {
 	tokens.push_back("INPUT");
 
 	//check for input keyword
-	if (checkLexeme("input")) {
-
-		//check for ID_LIST and semicolon
-		if (ID_LIST()) {
-			if (checkLexeme(";")) {
-				return true;
-			}
-
-			//return false and remove token if any check fails
-			else {
-				tokens.pop_back();
-				return false;
-			}
-		}
-		else {
-			tokens.pop_back();
-			return false;
-		}
-	}
-	else {
+	if (not checkLexeme("input")) {
 		tokens.pop_back();
 		return false;
 	}
+	
+	//check for ID_LIST
+	if (not ID_LIST()) {
+		tokens.pop_back();
+		return false;
+	}
+	
+	//check for semicolon
+	if (not checkLexeme(";")) {
+		grammarError();
+	}
+
+	return true;
 }
 
 //Rule 12: OUTPUT->output ID_LIST; | output NUM;
@@ -434,40 +439,23 @@ bool grammar::OUTPUT() {
 	tokens.push_back("OUTPUT");
 
 	//check for output keyword
-	if (lexemeList->front().getValue() == "output") {
-		lexemeList->pop_front();
-
-		//check for ID_LIST and semicolon, return false and remove token on semicolon fail
-		if (ID_LIST()) {
-			if (checkLexeme(";")) {
-				return true;
-			}
-			else {
-				tokens.pop_back();
-				return false;
-			}
-		}
-
-		//check for NUM and semicolon, return false and remove token on semicolon fail
-		else if (NUM()) {
-			if (checkLexeme(";")) {
-				return true;
-			}
-			else {
-				tokens.pop_back();
-				return false;
-			}
-		} 
-		//return false and remove token on any fail
-		else {
-			tokens.pop_back();
-			return false;
-		}
-	}
-	else {
+	if (not checkLexeme("output")) {
 		tokens.pop_back();
 		return false;
 	}
+
+	//check for ID_LIST or NUM
+	if (not NUM() and not ID_LIST()) {
+		tokens.pop_back();
+		return false;
+	}
+
+	//check for semicolon
+	if (not checkLexeme(";")) {
+		grammarError();
+	}
+
+	return true;
 }
 
 //Rule 13: EXPR->FACTOR | FACTOR + EXPR | FACTOR - EXPR
@@ -574,11 +562,13 @@ bool grammar::COMP() {
 
 	tokens.push_back("COMP");
 
+	//check for open parenthases
 	if (not checkLexeme("(")) {
 		tokens.pop_back();
 		return false;
 	}
 
+	//check for OPERAND
 	if (not OPERAND()) {
 		tokens.pop_back();
 		return false;
@@ -587,7 +577,7 @@ bool grammar::COMP() {
 	//const array of valid types
 	const std::string validOperators[4] = { "=", "<>", ">", "<"};
 
-	//return true if lexeme matches a valid operator
+	//check for valid operator
 	for (int i = 0; i < 3; i++) {
 		if (lexemeList->front().getValue() == validOperators[i]) {
 			debugLex(lexemeList->front());
@@ -596,11 +586,13 @@ bool grammar::COMP() {
 		}
 	}
 
+	//check for OPERAND
 	if (not OPERAND()) {
 		tokens.pop_back();
 		return false;
 	}
 
+	//check for closed parenthases
 	if (not checkLexeme(")")) {
 		tokens.pop_back();
 		return false;
@@ -638,8 +630,29 @@ bool grammar::checkLexeme(std::string word) {
 	}
 	//return false on fail
 	else if (word != "end") {
+
+		//convert semicolon symbol to word
+		if (word == ";") {
+			word = "semicolon";
+		}
+
+		//error msg and fail
 		errorMessage = "ERROR !! " + word + " missing on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
 		return false;
 	}
 	else { return false; }
+}
+
+bool grammar::identifierDeclared() {
+	//loop through list of declared identifiers
+	for (int i = 0; i < declaredIdentifiers.size(); i++) {
+		//return true if front lexeme in declared identifiers
+
+		if (declaredIdentifiers[i] == lexemeList->front().getValue()) {
+			return true;
+		}
+	}
+
+	//fail otherwise
+	return false;
 }

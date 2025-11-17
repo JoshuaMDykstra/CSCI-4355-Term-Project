@@ -1,5 +1,14 @@
 // CSCI 4355 Term Project.cpp : This file contains the 'main' function. Program execution begins and ends there.
 
+/* TODO
+DONE - catch errors in test 3 and 4
+DONE - impliment symbol table
+impliment errors
+empty deque error
+strip debugging bloat 
+doccumentation (comments and readme)
+*/
+
 /* instructions
 
 - LEXEMES -
@@ -70,8 +79,8 @@ const std::string files[100]{
     "test.txt",
     "TestCases-1\\input1.txt", //pass
     "TestCases-1\\input2.txt", //pass
-    "TestCases-1\\input3.txt", //implement identifier checking
-    "TestCases-1\\input4.txt", //not catch missing semi
+    "TestCases-1\\input3.txt", //pass
+    "TestCases-1\\input4.txt", //pass
     "TestCases-1\\input5.txt", //pass
     "TestCases-1\\input6.txt"  //pass
 
@@ -90,9 +99,7 @@ int main()
     //std::cout << "Enter file name: ";
     //std::getline(std::cin, inputFile);
 
-    //for (int i = 0; i < 10; i++) {
-        scan(inputFile);
-    //}
+    scan(inputFile);
 
     //exit message
     std::cout << "Done :)" << std::endl;
