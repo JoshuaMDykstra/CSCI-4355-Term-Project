@@ -1,3 +1,5 @@
+//lexeme.h
+ 
 #pragma once
 
 //library includes
@@ -16,14 +18,14 @@ private:
 
 public:
 //constructor
-	lexeme(std::string lexValue, int lineNum);
+	lexeme(std::string lexValue, int lineNum, lexemeType typeInput);
 
 //getters
-	int getTypeID();
+	int getTypeID() { return lexType; }
 	std::string getTypeStr();
-	std::string getValue();
-	int getSourceLine();
+	std::string getValue() { return lexemeValue; }
+	int getSourceLine() { return sourceLine; }
 
 //setters
-	void setType(lexemeType typeID);
+	void setType(lexemeType typeID) { lexType = typeID; }
 };

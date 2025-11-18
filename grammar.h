@@ -1,3 +1,5 @@
+//grammar.h
+
 #pragma once
 
 #include <iostream>
@@ -5,7 +7,6 @@
 #include <vector>
 
 #include "lexeme.h"
-#include "utils.h"
 
 class grammar {
 
@@ -24,8 +25,6 @@ private:
 
 	//debugging, error, and output functions
 	void grammarError();
-	void debugMsg(std::string msg);
-	void debugLex(lexeme inputLex);
 	void printLexemes();
 	void printTokens();
 

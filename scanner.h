@@ -1,3 +1,5 @@
+//scanner.h
+
 #pragma once
 
 //library includes
@@ -7,9 +9,30 @@
 #include <deque>
 
 //project includes
-#include "utils.h"
 #include "lexeme.h"
 #include "grammar.h"
+#include "utils.h"
 
-void scan(std::string userFileName);
+//prototypes
 
+class scanner {
+
+private:
+
+    //attributes
+    std::ifstream sourceFile;
+    std::string readLine;
+    std::deque<char> lineSymbols;
+    int lineNumber = 1;
+    std::deque<lexeme> lexemes;
+
+public:
+    scanner(std::string userFileName);
+    void findLexemes();
+    void symbol();
+    void number();
+    void word();
+    bool isNumLegal(char input);
+    bool isWordLegal(char input);
+    void illegalSymbol();
+};

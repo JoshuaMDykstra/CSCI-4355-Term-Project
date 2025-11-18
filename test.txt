@@ -1,4 +1,4 @@
-progr@m x, y: int;
+program x, y: int;
 begin
  input x,y;
  y:=x+y;

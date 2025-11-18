@@ -1,89 +1,137 @@
+//scanner.cpp
+
 #include "scanner.h"
 
-void scan(std::string userFileName) {
+scanner::scanner(std::string userFileName) {
+    
     //msg
     std::cout << "Analyzing " << userFileName << std::endl << std::endl;
 
-    //open input file stream
-    std::ifstream sourceFile;
     sourceFile.open(userFileName);
 
-    //string for current line being worked on
-    std::string workingLine;
+    while (std::getline(sourceFile, readLine)) {
 
-    //vector to store lexemes
-    std::deque<lexeme> lexemes;
-
-    //line tracker
-    int lineNumber = 0;
-
-    //TODO make this OR for loop  a function
-    while (std::getline(sourceFile, workingLine)) {
-        //account for getline removing newline char
-        workingLine = workingLine + '\n';
-
-        //string for working lexeme
-        std::string currentLexeme = "";
-
-        //scan for potential lexemes
-        for (int i = 0; i < workingLine.size(); i++) {
-
-            //std::cout << workingLine[i] << std::endl;
-
-            //check for symbols
-            if (isOperator(workingLine[i])) {
-
-                //clear empty lexeme
-                if (currentLexeme != "") {
-                    lexemes.push_back(lexeme(currentLexeme, lineNumber));
-                    currentLexeme = "";
-                }
-
-                //add current char to working lexeme
-                currentLexeme = currentLexeme + workingLine[i];
-
-                //check for multi symbol lexemes := and <>
-                if (workingLine[i] == ':' and workingLine[i + 1] == '=') {
-                    currentLexeme = currentLexeme + workingLine[i + 1];
-                    i++;
-                }
-                else if (workingLine[i] == '<' and workingLine[i + 1] == '>') {
-                    currentLexeme = currentLexeme + workingLine[i + 1];
-                    i++;
-                }
-
-                //add finished lexeme to vector and reset
-                lexemes.push_back(lexeme(currentLexeme, lineNumber));
-                currentLexeme = "";
-
-            }
-
-            //check for alphanumeric symbol
-            else if (workingLine[i] != ' ') {
-
-                currentLexeme = currentLexeme + workingLine[i];
-
-                //push working lexeme to vector if next symbol is space
-                if (workingLine[i + 1] == ' ' || workingLine[i + 1] == '\n') {
-                    lexemes.push_back(lexeme(currentLexeme, lineNumber));
-                    currentLexeme = "";
-                }
-
-            }
+        //convert str to deque
+        for (int i = 0; i < readLine.size(); i++) {
+            lineSymbols.push_back(readLine[i]);
         }
+
+        findLexemes();
 
         //incriment line number
         lineNumber++;
     }
 
-    //debugging tool - print lexemes
-    if (debugFlag) {
-        for (int i = 0; i < lexemes.size(); i++) {
-            std::cout << lexemes[i].getTypeStr() << ": " << lexemes[i].getValue() << std::endl;
-        }
-        std::cout << std::endl;
-    }
-
     //run grammar logic
     grammar runGrammar(&lexemes);
-	}
+}
+
+void scanner::findLexemes() {
+    while (not lineSymbols.empty()) {
+        if (lineSymbols.front() == ' ') {
+            lineSymbols.pop_front();
+        }
+        else if (isdigit(lineSymbols.front())) {
+            number();
+        }
+        else if (isalpha(lineSymbols.front()) or lineSymbols.front() == '_') {
+            word();
+        }
+        else if (isOperator(lineSymbols.front())) {
+            symbol();
+        }
+        else {
+            illegalSymbol(); }
+    }
+}
+
+void scanner::number() {
+
+    std::string workingLexeme = "";
+
+    bool decimalFlag = false;
+
+    workingLexeme.push_back(lineSymbols.front());
+    lineSymbols.pop_front();
+
+    while (not lineSymbols.empty() and isNumLegal(lineSymbols.front())) {
+
+        if (lineSymbols.front() == '.') {
+            if (decimalFlag) {
+                std::cout << "ERROR !! illegal number on line " << lineNumber << '.';
+                exit(2);
+            }
+            else {
+                decimalFlag = true;
+            }
+        }
+        
+
+        workingLexeme.push_back(lineSymbols.front());
+        lineSymbols.pop_front();
+    }
+
+    lexemes.push_back(lexeme(workingLexeme, lineNumber, NUMBER));
+}
+
+void scanner::word() {
+    std::string workingLexeme = "";
+
+    lexemeType type;
+
+    workingLexeme.push_back(lineSymbols.front());
+    lineSymbols.pop_front();
+
+    while (not lineSymbols.empty() and isWordLegal(lineSymbols.front())) {
+
+        workingLexeme.push_back(lineSymbols.front());
+        lineSymbols.pop_front();
+    }
+
+    if (isReservedWord(workingLexeme)) {
+        type = RESERVED_WORD;
+    }
+    else {
+        type = IDENTIFIER;
+    }
+
+    lexemes.push_back(lexeme(workingLexeme, lineNumber, type));
+}
+
+void scanner::symbol() {
+    
+    std::string workingLexeme;
+
+    workingLexeme.push_back(lineSymbols.front());
+    lineSymbols.pop_front();
+
+    if (workingLexeme == ":" and lineSymbols.front() == '=') {
+        workingLexeme.push_back(lineSymbols.front());
+        lineSymbols.pop_front();
+    }
+    else if (workingLexeme == "<" and lineSymbols.front() == '>') {
+        workingLexeme.push_back(lineSymbols.front());
+        lineSymbols.pop_front();
+    }
+
+    lexemes.push_back(lexeme(workingLexeme, lineNumber, OPERATOR));
+}
+
+bool scanner::isNumLegal(char input) {
+    if (isdigit(input) or input == '.') {
+        return true;
+    }
+    return false;
+}
+
+bool scanner::isWordLegal(char input) {
+    if (isdigit(input) or isalpha(input) or input == '_') {
+        return true;
+    }
+    return false;
+}
+
+void scanner::illegalSymbol() {
+    std::cout << "ERROR !! illegal symbol \"" << lineSymbols.front() << "\" on line " << lineNumber << '.';
+    exit(2);
+}

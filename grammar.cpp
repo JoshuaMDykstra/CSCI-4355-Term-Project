@@ -1,15 +1,18 @@
+//grammar.cpp
+
 #include "grammar.h"
+
+//debugging tool
+const bool debugFlag = false;
 
 //constructor
 grammar::grammar(std::deque<lexeme>* quePtr) {
 	
 	//take in pointer
 	lexemeList = quePtr;
-	
-	//default error msg
-	//errorMessage;
 
-	if (true) { printLexemes(); }
+	//debugging tool
+	if (debugFlag) { printLexemes(); }
 
 	//run grammar logic
 	if (not PROGRAM()) {
@@ -31,25 +34,7 @@ void grammar::grammarError() {
 
 	//print error msg and exit
 	std::cout << errorMessage << std::endl;
-	exit(2);
-}
-
-//standard debugging msg function
-void grammar::debugMsg(std::string msg) {
-
-	//print msg if debug flag on
-	if (debugFlag) {
-		std::cout << "DEBUG: " << msg << std::endl;
-	}
-}
-
-//debugging msg function for lexemes
-void grammar::debugLex(lexeme inputLex) {
-
-	//print lexeme info if debug flag on
-	if (debugFlag) {
-		std::cout << "DEBUG: " << inputLex.getTypeStr() << " \"" << inputLex.getValue() << "\" Line:" << inputLex.getSourceLine() << std::endl;
-	}
+	exit(3);
 }
 
 void grammar::printLexemes() {
@@ -71,12 +56,6 @@ void grammar::printLexemes() {
 
 //print token function
 void grammar::printTokens() {
-
-	//msg if debug flag on
-	if (debugFlag) {
-		std::cout << "##### PRINTING TOKENS #####" << std::endl << std::endl;
-
-	}
 
 	//loop through token vector and print them
 	for (int i = 0; i < tokens.size(); i++) {
@@ -198,7 +177,6 @@ bool grammar::ID_LIST() {
 		return true;
 	}
 	else {
-		//errorMessage = "ERROR !! impropper id list on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
 		tokens.pop_back();
 		return false;
 	}
@@ -215,20 +193,17 @@ bool grammar::ID() {
 	//if in decleration section, add identifier to list of declared identifiers and return true
 	if (declerationSectionFlag) {
 		declaredIdentifiers.push_back(lexemeList->front().getValue());
-
-		debugLex(lexemeList->front());
 		lexemeList->pop_front();
 		return true;
 	}
 	else {
 		//if not in decleration section and identifier was previously declared return true, exit if not
 		if (identifierDeclared()) {
-			debugLex(lexemeList->front());
 			lexemeList->pop_front();
 			return true;
 		}
 		else {
-			errorMessage = "ERROR !! identifier " + lexemeList->front().getValue() + " not declared in line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
+			errorMessage = "ERROR !! identifier \"" + lexemeList->front().getValue() + "\" not declared in line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
 			grammarError();
 		}
 	}
@@ -252,7 +227,6 @@ bool grammar::STMT_SEC() {
 	//return false and remove token if fail
 	else {
 		tokens.pop_back();
-		//errorMessage = "ERROR !! impropper statement section on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
 		return false;
 	}
 }
@@ -545,12 +519,10 @@ bool grammar::NUM() {
 
 	//check lexeme is NUMBER type
 	if (lexemeList->front().getTypeID() == NUMBER) {
-		debugLex(lexemeList->front());
 		lexemeList->pop_front();
 	}
 	//return false on fail
 	else {
-		//errorMessage = "ERROR !! impropper number literal on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
 		return false;
 	}
 
@@ -580,7 +552,6 @@ bool grammar::COMP() {
 	//check for valid operator
 	for (int i = 0; i < 3; i++) {
 		if (lexemeList->front().getValue() == validOperators[i]) {
-			debugLex(lexemeList->front());
 			lexemeList->pop_front();
 			break;
 		}
@@ -610,7 +581,6 @@ bool grammar::TYPE() {
 	//return true if lexeme matches a valid type
 	for (int i = 0; i < 3; i++) {
 		if (lexemeList->front().getValue() == validTypes[i]) {
-			debugLex(lexemeList->front());
 			lexemeList->pop_front();
 			return true;
 		}
@@ -624,20 +594,20 @@ bool grammar::checkLexeme(std::string word) {
 	
 	//pop lexeme and return true if next lexeme if semicolon
 	if (lexemeList->front().getValue() == word) {
-		debugLex(lexemeList->front());
 		lexemeList->pop_front();
 		return true;
 	}
 	//return false on fail
 	else if (word != "end") {
 
-		//convert semicolon symbol to word
+		//error msg and fail
 		if (word == ";") {
-			word = "semicolon";
+			errorMessage = "ERROR !! semicolon missing on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
+		}
+		else {
+			errorMessage = "ERROR !! " + word + " missing on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
 		}
 
-		//error msg and fail
-		errorMessage = "ERROR !! " + word + " missing on line " + std::to_string(lexemeList->front().getSourceLine()) + '.';
 		return false;
 	}
 	else { return false; }

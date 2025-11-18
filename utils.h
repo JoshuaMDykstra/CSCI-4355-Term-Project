@@ -1,10 +1,9 @@
+//utils.h
+
 #pragma once
 
 //library includes
 #include <string>
-
-//debug setting
-const bool debugFlag = false;
 
 enum lexemeType {
 	UNKNOWN,
